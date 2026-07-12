@@ -10,7 +10,8 @@ const REVENUE_DATA = [
   { month: 'Apr', amount: 63000 },
   { month: 'May', amount: 58000 },
   { month: 'Jun', amount: 72000 },
-  { month: 'Jul', amount: 68000 }
+  { month: 'Jul', amount: 68000 },
+  { month: 'Aug', amount: 69000 }
 ]
 
 // Costliest vehicles mock data
