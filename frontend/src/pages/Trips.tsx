@@ -12,6 +12,7 @@ interface TripsProps {
   vehicles: Vehicle[]
   setVehicles: React.Dispatch<React.SetStateAction<Vehicle[]>>
   drivers: Driver[]
+  readOnly?: boolean
 }
 
 // Seed mock drivers
@@ -24,7 +25,7 @@ const INITIAL_DRIVERS = [
   { name: 'Sarah', status: 'Available', licenseCategory: 'LMV' }
 ]
 
-export default function Trips({ trips, setTrips, vehicles, setVehicles, drivers }: TripsProps) {
+export default function Trips({ trips, setTrips, vehicles, setVehicles, drivers, readOnly = false }: TripsProps) {
   // Form fields
   const [source, setSource] = useState('Gandhinagar Depot')
   const [destination, setDestination] = useState('Ahmedabad Hub')
@@ -190,7 +191,16 @@ export default function Trips({ trips, setTrips, vehicles, setVehicles, drivers 
         </div>
       )}
 
-      {/* Create Trip Form Column */}
+      {/* Create Trip Form Column — hidden in view-only mode */}
+      {readOnly ? (
+        <div className="lg:col-span-4">
+          <div className="p-5 rounded-2xl bg-blue-500/5 border border-blue-500/20 flex flex-col items-center justify-center gap-3 py-10">
+            <AlertCircle className="text-blue-500" size={28} />
+            <p className="text-sm font-bold text-blue-500">View Only Access</p>
+            <p className="text-xs text-text-secondary text-center">Your role allows you to monitor trips but not create or modify them.</p>
+          </div>
+        </div>
+      ) : (
       <div className="lg:col-span-4 space-y-6">
         <div className="p-5 rounded-2xl bg-bg-card shadow-sm space-y-5 hover:shadow-md transition-shadow duration-300">
           
@@ -381,6 +391,7 @@ export default function Trips({ trips, setTrips, vehicles, setVehicles, drivers 
 
         </div>
       </div>
+      )}
 
       {/* Live Board Column */}
       <div className="lg:col-span-8 space-y-6">
