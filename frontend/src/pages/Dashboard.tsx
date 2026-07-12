@@ -1,4 +1,5 @@
 import { AlertTriangle, ArrowDownRight, BarChart3, CheckCircle, Clock, Play, Truck, TrendingUp, Users, Wrench, X } from 'lucide-react'
+import { type Vehicle } from './fleet'
 
 export interface Trip {
 	id: string
@@ -45,6 +46,7 @@ type DashboardProps = {
 	onNewVehicleTypeChange: (value: 'Van' | 'Truck' | 'Mini' | 'Sedan') => void
 	newRegion: 'North' | 'South' | 'East' | 'West'
 	onNewRegionChange: (value: 'North' | 'South' | 'East' | 'West') => void
+	vehicles: Vehicle[]
 }
 
 function Dashboard({
@@ -80,7 +82,8 @@ function Dashboard({
 	newVehicleType,
 	onNewVehicleTypeChange,
 	newRegion,
-	onNewRegionChange
+	onNewRegionChange,
+	vehicles
 }: DashboardProps) {
 	const statusStyles = {
 		'On Trip': 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/30',
@@ -423,14 +426,21 @@ function Dashboard({
 							<div className="grid grid-cols-2 gap-4">
 								<div>
 									<label className="block text-xs font-semibold text-text-secondary uppercase mb-1">Vehicle Tag</label>
-									<input
-										type="text"
-										placeholder="e.g. VAN-09"
+									<select
 										value={newVehicle}
 										onChange={(e) => onNewVehicleChange(e.target.value)}
 										required
-										className="block w-full px-3.5 py-2 text-sm rounded-xl bg-bg-card border border-border-custom text-text-primary placeholder-text-secondary focus:ring-1 focus:ring-brand-orange focus:border-brand-orange focus:outline-none"
-									/>
+										className="block w-full px-3.5 py-2 text-sm rounded-xl bg-bg-card border border-border-custom text-text-primary focus:ring-1 focus:ring-brand-orange focus:border-brand-orange focus:outline-none cursor-pointer"
+									>
+										<option value="">Select vehicle...</option>
+										{vehicles
+											.filter((v) => v.status === 'Available')
+											.map((v) => (
+												<option key={v.regNo} value={v.nameModel}>
+													{v.nameModel} ({v.type})
+												</option>
+											))}
+									</select>
 								</div>
 
 								<div>
