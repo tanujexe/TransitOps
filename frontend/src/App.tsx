@@ -12,6 +12,7 @@ import Analytics from './pages/Analytics'
 import SettingsPage from './pages/Settings'
 import AuthPage, { type AuthUser } from './pages/AuthPage'
 import { api, login, clearToken } from './utils/api'
+import { getAccess, getDefaultTab, getAllowedModules } from './utils/permissions'
 
 export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -90,10 +91,21 @@ export default function App() {
     }
   }, [isAuthenticated, activeRole])
 
+  // Route guard: when role changes, redirect to a tab the role can access
+  useEffect(() => {
+    if (isAuthenticated) {
+      const allowed = getAllowedModules(activeRole)
+      if (!allowed.includes(activeTab as any)) {
+        setActiveTab(getDefaultTab(activeRole))
+      }
+    }
+  }, [activeRole, isAuthenticated])
+
   // Handle login success from AuthPage
   const handleLogin = (token: string, user: AuthUser) => {
     setCurrentUser(user)
     setActiveRole(user.role)
+    setActiveTab(getDefaultTab(user.role))
     setIsAuthenticated(true)
   }
 
@@ -223,6 +235,7 @@ export default function App() {
         onThemeChange={setTheme} 
         isSidebarOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
+        activeRole={activeRole}
       />
 
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -245,11 +258,22 @@ export default function App() {
 
         <main className="flex-1 overflow-y-auto p-8 space-y-6">
           {activeTab === 'Fleet' ? (
-            <Fleet vehicles={vehicles} setVehicles={setVehicles} />
+            <Fleet
+              vehicles={vehicles}
+              setVehicles={setVehicles}
+              readOnly={getAccess(activeRole, 'Fleet') === 'view'}
+            />
           ) : activeTab === 'Drivers' ? (
             <Drivers drivers={drivers} setDrivers={setDrivers} />
           ) : activeTab === 'Trips' ? (
-            <Trips trips={trips} setTrips={setTrips} vehicles={vehicles} setVehicles={setVehicles} drivers={drivers} />
+            <Trips
+              trips={trips}
+              setTrips={setTrips}
+              vehicles={vehicles}
+              setVehicles={setVehicles}
+              drivers={drivers}
+              readOnly={getAccess(activeRole, 'Trips') === 'view'}
+            />
           ) : activeTab === 'Maintenance' ? (
             <Maintenance vehicles={vehicles} setVehicles={setVehicles} />
           ) : activeTab === 'Fuel & Expenses' ? (
@@ -257,7 +281,7 @@ export default function App() {
           ) : activeTab === 'Analytics' ? (
             <Analytics />
           ) : activeTab === 'Settings' ? (
-            <SettingsPage />
+            <SettingsPage readOnly={getAccess(activeRole, 'Settings') === 'view'} />
           ) : (
             <Dashboard
               activeTab={activeTab}

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { CheckCircle, Shield, Settings, Check, Minus, Info } from 'lucide-react'
 
-export default function SettingsPage() {
+export default function SettingsPage({ readOnly = false }: { readOnly?: boolean }) {
   // Form fields state
   const [depotName, setDepotName] = useState('Gandhinagar Depot GJ14')
   const [currency, setCurrency] = useState('INR (Rs)')
@@ -63,6 +63,13 @@ export default function SettingsPage() {
         <div className="p-5 rounded-2xl bg-bg-card shadow-sm space-y-5 hover:shadow-md transition-shadow duration-300">
           <h3 className="text-base font-bold text-text-primary">General</h3>
 
+          {readOnly && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-500/10 border border-blue-500/20">
+              <Info size={14} className="text-blue-500 shrink-0" />
+              <span className="text-xs font-semibold text-blue-500">View Only — changes are disabled for your role</span>
+            </div>
+          )}
+
           <form onSubmit={handleSaveChanges} className="space-y-4">
             {/* Depot Name */}
             <div className="space-y-1.5">
@@ -70,7 +77,8 @@ export default function SettingsPage() {
               <input
                 type="text"
                 required
-                className="w-full px-3 py-2 rounded-xl bg-bg-main text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/30 transition-all"
+                disabled={readOnly}
+                className="w-full px-3 py-2 rounded-xl bg-bg-main text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 value={depotName}
                 onChange={(e) => setDepotName(e.target.value)}
               />
@@ -82,7 +90,8 @@ export default function SettingsPage() {
               <input
                 type="text"
                 required
-                className="w-full px-3 py-2 rounded-xl bg-bg-main text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/30 transition-all"
+                disabled={readOnly}
+                className="w-full px-3 py-2 rounded-xl bg-bg-main text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
               />
@@ -94,18 +103,21 @@ export default function SettingsPage() {
               <input
                 type="text"
                 required
-                className="w-full px-3 py-2 rounded-xl bg-bg-main text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/30 transition-all"
+                disabled={readOnly}
+                className="w-full px-3 py-2 rounded-xl bg-bg-main text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 value={distanceUnit}
                 onChange={(e) => setDistanceUnit(e.target.value)}
               />
             </div>
 
-            <button
-              type="submit"
-              className="px-5 py-2.5 bg-brand-orange hover:bg-brand-orange-hover text-white rounded-xl text-sm font-bold shadow-lg shadow-orange-500/10 transition-colors cursor-pointer"
-            >
-              Save changes
-            </button>
+            {!readOnly && (
+              <button
+                type="submit"
+                className="px-5 py-2.5 bg-brand-orange hover:bg-brand-orange-hover text-white rounded-xl text-sm font-bold shadow-lg shadow-orange-500/10 transition-colors cursor-pointer"
+              >
+                Save changes
+              </button>
+            )}
           </form>
         </div>
       </div>
