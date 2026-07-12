@@ -111,51 +111,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Right Column: RBAC Matrix Dashboard */}
-      <div className="lg:col-span-8 space-y-6">
-        <div className="p-6 rounded-2xl bg-bg-card shadow-sm space-y-6 min-h-[400px] hover:shadow-md transition-shadow duration-300">
-          <div className="flex items-center gap-2">
-            <Shield size={18} className="text-brand-orange" />
-            <h3 className="text-base font-bold text-text-primary">Role-Based Access (RBAC)</h3>
-          </div>
-
-          <div className="overflow-hidden rounded-2xl">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-bg-main/30 text-text-secondary border-b border-bg-main/50">
-                  <th className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider">Role</th>
-                  <th className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider">Fleet</th>
-                  <th className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider">Driver</th>
-                  <th className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider">Trip</th>
-                  <th className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider">Fuel/Exp.</th>
-                  <th className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider">Analytics</th>
-                </tr>
-              </thead>
-              <tbody className="text-text-primary divide-y divide-bg-main/20">
-                {RBAC_DATA.map((row) => (
-                  <tr key={row.role} className="hover:bg-bg-main/15 transition-colors">
-                    <td className="px-4 py-3.5 text-sm font-bold">{row.role}</td>
-                    <td className="px-4 py-3.5 text-sm">{getCellBadge(row.fleet)}</td>
-                    <td className="px-4 py-3.5 text-sm">{getCellBadge(row.driver)}</td>
-                    <td className="px-4 py-3.5 text-sm">{getCellBadge(row.trip)}</td>
-                    <td className="px-4 py-3.5 text-sm">{getCellBadge(row.fuel)}</td>
-                    <td className="px-4 py-3.5 text-sm">{getCellBadge(row.analytics)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="p-3 bg-bg-main/20 text-text-secondary rounded-xl text-xs space-y-1">
-            <div className="flex items-center gap-1.5 font-bold text-text-primary">
-              <Info size={14} /> Security Advisory
-            </div>
-            <p className="text-[11px] leading-relaxed">
-              Role permissions are strictly enforced on both the backend routes and UI routing layers to prevent privilege escalations.
-            </p>
-          </div>
-
-        </div>
-      </div>
+      
     </div>
   )
 }
