@@ -89,9 +89,6 @@ export default function Trips({ trips, setTrips, vehicles, setVehicles, drivers 
     }
 
     const vehicleObj = vehicles.find(v => v.regNo === selectedVehicleReg)!
-    const nextTripId = `TR${(trips.length + 1).toString().padStart(3, '0')}`
-
-    const vehicleObj = vehicles.find(v => v.regNo === selectedVehicleReg)!
     const driverObj = drivers.find(d => d.name === selectedDriverName)!
 
     if (!vehicleObj || !driverObj) {
