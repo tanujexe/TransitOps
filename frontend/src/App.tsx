@@ -229,6 +229,7 @@ export default function App() {
         <Navbar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
+          onMenuClick={() => setIsSidebarOpen(true)}
           activeRole={activeRole}
           currentUser={currentUser}
           onLogout={handleLogout}

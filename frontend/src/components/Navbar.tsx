@@ -1,8 +1,9 @@
-import { Bell, LogOut, Search } from 'lucide-react'
+import { Bell, LogOut, Menu, Search } from 'lucide-react'
 
 type NavbarProps = {
   searchQuery: string
   onSearchChange: (value: string) => void
+  onMenuClick?: () => void
   onLogout?: () => void
   activeRole: string
   currentUser?: { name: string; email: string; role: string } | null
@@ -13,6 +14,7 @@ type NavbarProps = {
 function Navbar({
   searchQuery,
   onSearchChange,
+  onMenuClick,
   onLogout,
   activeRole,
   currentUser,
@@ -22,8 +24,16 @@ function Navbar({
   return (
     <header className="flex h-16 items-center justify-between px-4 sm:px-8 bg-bg-card border-b border-border-custom transition-all duration-300 gap-4 shrink-0">
       
-      {/* Left section: Title */}
+      {/* Left section: Hamburger (mobile) + Title */}
       <div className="flex items-center gap-3">
+        {onMenuClick && (
+          <button
+            onClick={onMenuClick}
+            className="p-2 text-text-secondary hover:text-text-primary hover:bg-bg-main rounded-xl transition-colors lg:hidden cursor-pointer"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        )}
         <div className="flex flex-col">
           <h1 className="text-base sm:text-xl font-bold text-text-primary tracking-tight whitespace-nowrap">{title}</h1>
           <span className="hidden sm:inline text-xs text-text-secondary">{subtitle}</span>
