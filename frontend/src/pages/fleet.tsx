@@ -239,45 +239,98 @@ export default function Fleet({ vehicles, setVehicles }: FleetProps) {
         </button>
       </div>
 
-      {/* Vehicle List Table */}
-      <div className="overflow-hidden rounded-2xl bg-bg-card shadow-sm">
+      {/* Vehicle List — Cards on mobile, Table on md+ */}
+
+      {/* Mobile / Tablet Card Grid */}
+      <div className="md:hidden space-y-3">
+        {filteredVehicles.length > 0 ? (
+          filteredVehicles.map((vehicle, idx) => (
+            <div
+              key={idx}
+              className="rounded-2xl bg-bg-card border border-border-custom p-4 space-y-3 hover:shadow-md transition-shadow duration-200"
+            >
+              {/* Top row: badge + status */}
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-xs font-bold tracking-widest whitespace-nowrap px-2.5 py-1 rounded-lg bg-bg-main border border-border-custom text-text-primary">
+                  {vehicle.regNo}
+                </span>
+                {getStatusBadge(vehicle.status)}
+              </div>
+
+              {/* Vehicle name */}
+              <p className="text-sm font-semibold text-text-primary">{vehicle.nameModel}</p>
+
+              {/* Details grid */}
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                <div>
+                  <span className="text-text-secondary font-medium">Type</span>
+                  <p className="text-text-primary font-semibold mt-0.5">{vehicle.type}</p>
+                </div>
+                <div>
+                  <span className="text-text-secondary font-medium">Capacity</span>
+                  <p className="text-text-primary font-semibold mt-0.5">{vehicle.capacity}</p>
+                </div>
+                <div>
+                  <span className="text-text-secondary font-medium">Odometer</span>
+                  <p className="text-text-primary font-semibold mt-0.5">{vehicle.odometer.toLocaleString()} km</p>
+                </div>
+                <div>
+                  <span className="text-text-secondary font-medium">Acq. Cost</span>
+                  <p className="text-text-primary font-semibold mt-0.5">₹{vehicle.acqCost.toLocaleString()}</p>
+                </div>
+              </div>
+
+              {/* Details button */}
+              <div className="pt-1 border-t border-border-custom/50">
+                <button
+                  onClick={() => setSelectedVehicle(vehicle)}
+                  className="flex items-center gap-1.5 text-xs font-bold text-brand-orange hover:underline cursor-pointer"
+                >
+                  <Info size={12} /> View Details
+                </button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="rounded-2xl bg-bg-card p-16 flex flex-col items-center justify-center text-text-secondary space-y-2">
+            <Truck className="h-10 w-10 text-text-muted mb-1 animate-bounce" />
+            <p className="font-semibold">No Vehicles Found</p>
+            <p className="text-xs text-text-muted text-center">Try adjusting your filters or add a new vehicle.</p>
+          </div>
+        )}
+      </div>
+
+      {/* Desktop Table */}
+      <div className="hidden md:block overflow-hidden rounded-2xl bg-bg-card shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-bg-main/30 text-text-secondary border-b border-bg-main/50">
-                <th 
+                <th
                   onClick={() => toggleSort('regNo')}
-                  className="px-6 py-4 text-xs font-bold uppercase tracking-wider cursor-pointer hover:text-text-primary select-none"
+                  className="px-6 py-4 text-xs font-bold uppercase tracking-wider cursor-pointer hover:text-text-primary select-none min-w-[140px]"
                 >
-                  <div className="flex items-center gap-1">
-                    Reg No <ArrowUpDown size={12} />
-                  </div>
+                  <div className="flex items-center gap-1">Reg No <ArrowUpDown size={12} /></div>
                 </th>
-                <th 
+                <th
                   onClick={() => toggleSort('nameModel')}
                   className="px-6 py-4 text-xs font-bold uppercase tracking-wider cursor-pointer hover:text-text-primary select-none"
                 >
-                  <div className="flex items-center gap-1">
-                    Name/Model <ArrowUpDown size={12} />
-                  </div>
+                  <div className="flex items-center gap-1">Name/Model <ArrowUpDown size={12} /></div>
                 </th>
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider">Type</th>
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider">Capacity</th>
-                <th 
+                <th
                   onClick={() => toggleSort('odometer')}
                   className="px-6 py-4 text-xs font-bold uppercase tracking-wider cursor-pointer hover:text-text-primary select-none"
                 >
-                  <div className="flex items-center gap-1">
-                    Odometer <ArrowUpDown size={12} />
-                  </div>
+                  <div className="flex items-center gap-1">Odometer <ArrowUpDown size={12} /></div>
                 </th>
-                <th 
+                <th
                   onClick={() => toggleSort('acqCost')}
                   className="px-6 py-4 text-xs font-bold uppercase tracking-wider cursor-pointer hover:text-text-primary select-none"
                 >
-                  <div className="flex items-center gap-1">
-                    Acq Cost <ArrowUpDown size={12} />
-                  </div>
+                  <div className="flex items-center gap-1">Acq Cost <ArrowUpDown size={12} /></div>
                 </th>
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider">Status</th>
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-right">Action</th>
@@ -286,11 +339,12 @@ export default function Fleet({ vehicles, setVehicles }: FleetProps) {
             <tbody className="text-text-primary divide-y divide-bg-main/20">
               {filteredVehicles.length > 0 ? (
                 filteredVehicles.map((vehicle, idx) => (
-                  <tr 
-                    key={idx} 
-                    className="hover:bg-bg-main/15 transition-colors duration-150 group"
-                  >
-                    <td className="px-6 py-4 font-mono text-sm font-semibold">{vehicle.regNo}</td>
+                  <tr key={idx} className="hover:bg-bg-main/15 transition-colors duration-150 group">
+                    <td className="px-6 py-4">
+                      <span className="inline-block font-mono text-xs font-bold tracking-widest whitespace-nowrap px-2.5 py-1 rounded-lg bg-bg-main border border-border-custom text-text-primary">
+                        {vehicle.regNo}
+                      </span>
+                    </td>
                     <td className="px-6 py-4 text-sm font-medium">{vehicle.nameModel}</td>
                     <td className="px-6 py-4 text-sm text-text-secondary">{vehicle.type}</td>
                     <td className="px-6 py-4 text-sm text-text-secondary">{vehicle.capacity}</td>
@@ -298,7 +352,7 @@ export default function Fleet({ vehicles, setVehicles }: FleetProps) {
                     <td className="px-6 py-4 text-sm text-text-secondary">₹{vehicle.acqCost.toLocaleString()}</td>
                     <td className="px-6 py-4 text-sm">{getStatusBadge(vehicle.status)}</td>
                     <td className="px-6 py-4 text-sm text-right">
-                      <button 
+                      <button
                         onClick={() => setSelectedVehicle(vehicle)}
                         className="text-xs font-bold text-brand-orange hover:underline flex items-center justify-end gap-1 ml-auto cursor-pointer"
                       >

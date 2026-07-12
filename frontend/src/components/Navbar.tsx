@@ -1,12 +1,11 @@
-import { Bell, ChevronDown, Plus, Search, Menu } from 'lucide-react'
+import { Bell, LogOut, Search } from 'lucide-react'
 
 type NavbarProps = {
   searchQuery: string
   onSearchChange: (value: string) => void
-  onDispatchClick: () => void
-  onMenuClick?: () => void
+  onLogout?: () => void
   activeRole: string
-  onRoleChange: (role: string) => void
+  currentUser?: { name: string; email: string; role: string } | null
   title?: string
   subtitle?: string
 }
@@ -14,26 +13,17 @@ type NavbarProps = {
 function Navbar({
   searchQuery,
   onSearchChange,
-  onDispatchClick,
-  onMenuClick,
+  onLogout,
   activeRole,
-  onRoleChange,
+  currentUser,
   title = 'Dashboard Overview',
   subtitle = 'Real-time transit operations monitoring'
 }: NavbarProps) {
   return (
     <header className="flex h-16 items-center justify-between px-4 sm:px-8 bg-bg-card border-b border-border-custom transition-all duration-300 gap-4 shrink-0">
       
-      {/* Left section: Hamburger + Title */}
+      {/* Left section: Title */}
       <div className="flex items-center gap-3">
-        {onMenuClick && (
-          <button 
-            onClick={onMenuClick}
-            className="p-2 text-text-secondary hover:text-text-primary hover:bg-bg-main rounded-xl transition-colors lg:hidden cursor-pointer"
-          >
-            <Menu className="h-5 w-5" />
-          </button>
-        )}
         <div className="flex flex-col">
           <h1 className="text-base sm:text-xl font-bold text-text-primary tracking-tight whitespace-nowrap">{title}</h1>
           <span className="hidden sm:inline text-xs text-text-secondary">{subtitle}</span>
@@ -54,30 +44,8 @@ function Navbar({
         />
       </div>
 
-      {/* Right section: Actions + Role Switcher + Profile */}
+      {/* Right section: Profile + Actions */}
       <div className="flex items-center gap-2 sm:gap-4">
-        <button
-          onClick={onDispatchClick}
-          className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-brand-orange hover:bg-brand-orange-hover active:scale-95 rounded-2xl shadow-lg shadow-orange-500/20 transition-all duration-200 cursor-pointer"
-        >
-          <Plus className="h-4 w-4" />
-          <span className="hidden xs:inline">Dispatch Trip</span>
-          <span className="xs:hidden">Dispatch</span>
-        </button>
-
-        {/* Role Switcher Selector */}
-        <div className="flex items-center gap-1.5">
-          <select
-            value={activeRole}
-            onChange={(e) => onRoleChange(e.target.value)}
-            className="bg-bg-main text-text-primary text-xs font-bold px-2 py-1.5 rounded-xl border border-border-custom cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-orange/30"
-          >
-            <option value="FLEET_MANAGER">Fleet Manager</option>
-            <option value="DISPATCHER">Dispatcher</option>
-            <option value="SAFETY_OFFICER">Safety Officer</option>
-            <option value="FINANCIAL_ANALYST">Financial Analyst</option>
-          </select>
-        </div>
 
         <button className="relative p-2 text-text-secondary hover:text-text-primary hover:bg-bg-main rounded-xl transition-all duration-200">
           <Bell className="h-5 w-5" />
@@ -94,11 +62,22 @@ function Navbar({
           </div>
           <div className="hidden lg:flex flex-col text-left">
             <span className="text-sm font-semibold text-text-primary group-hover:text-brand-orange transition-colors">
-              {activeRole === 'FLEET_MANAGER' ? 'Fleet Manager' : activeRole === 'DISPATCHER' ? 'Dispatcher John' : activeRole === 'SAFETY_OFFICER' ? 'Officer Sarah' : 'Analyst Fiona'}
+              {currentUser?.name || (activeRole === 'FLEET_MANAGER' ? 'Fleet Manager' : activeRole === 'DISPATCHER' ? 'Dispatcher' : activeRole === 'SAFETY_OFFICER' ? 'Safety Officer' : 'Financial Analyst')}
             </span>
-            <span className="text-[10px] font-medium text-text-secondary uppercase">{activeRole.replace('_', ' ')}</span>
+            <span className="text-[10px] font-medium text-text-secondary uppercase">{activeRole.replace(/_/g, ' ')}</span>
           </div>
         </div>
+
+        {/* Logout button */}
+        {onLogout && (
+          <button
+            onClick={onLogout}
+            title="Sign out"
+            className="p-2 text-text-secondary hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all duration-200 cursor-pointer"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
+        )}
       </div>
     </header>
   )

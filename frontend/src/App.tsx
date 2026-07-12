@@ -10,12 +10,24 @@ import Maintenance from './pages/Maintenance'
 import FuelExpenses from './pages/FuelExpenses'
 import Analytics from './pages/Analytics'
 import SettingsPage from './pages/Settings'
-import { api, login } from './utils/api'
+import AuthPage, { type AuthUser } from './pages/AuthPage'
+import { api, login, clearToken } from './utils/api'
 
 export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     const saved = localStorage.getItem('theme')
     return (saved as 'light' | 'dark') || 'light'
+  })
+
+  // Auth state – check if user already has a valid token stored
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return !!(localStorage.getItem('token') && localStorage.getItem('user'))
+  })
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => {
+    try {
+      const raw = localStorage.getItem('user')
+      return raw ? JSON.parse(raw) : null
+    } catch { return null }
   })
 
   // Navigation tab state
@@ -56,13 +68,9 @@ export default function App() {
     localStorage.setItem('theme', theme)
   }, [theme])
 
-  // Load all data from API on start and when role changes
+  // Load all data from API (called after auth is established)
   const loadData = async () => {
     try {
-      // First ensure authenticated
-      await login(activeRole)
-
-      // Fetch
       const fetchedVehicles = await api.getVehicles()
       setVehicles(fetchedVehicles)
 
@@ -77,8 +85,27 @@ export default function App() {
   }
 
   useEffect(() => {
-    loadData()
-  }, [activeRole])
+    if (isAuthenticated) {
+      loadData()
+    }
+  }, [isAuthenticated, activeRole])
+
+  // Handle login success from AuthPage
+  const handleLogin = (token: string, user: AuthUser) => {
+    setCurrentUser(user)
+    setActiveRole(user.role)
+    setIsAuthenticated(true)
+  }
+
+  // Handle logout
+  const handleLogout = () => {
+    clearToken()
+    setIsAuthenticated(false)
+    setCurrentUser(null)
+    setVehicles([])
+    setDrivers([])
+    setTrips([])
+  }
 
   // Handle active role switch
   const handleRoleChange = async (role: string) => {
@@ -174,6 +201,11 @@ export default function App() {
     return matchesSearch && matchesType && matchesStatus && matchesRegion
   })
 
+  // Auth gate – show login page if not authenticated
+  if (!isAuthenticated) {
+    return <AuthPage onLogin={handleLogin} />
+  }
+
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-bg-main text-text-primary">
       {/* Backdrop for mobile */}
@@ -197,10 +229,9 @@ export default function App() {
         <Navbar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          onDispatchClick={() => setIsModalOpen(true)}
-          onMenuClick={() => setIsSidebarOpen(true)}
           activeRole={activeRole}
-          onRoleChange={handleRoleChange}
+          currentUser={currentUser}
+          onLogout={handleLogout}
           title={activeTab === 'Fleet' ? 'Vehicle Registry' : activeTab === 'Dashboard' ? 'Dashboard Overview' : `${activeTab} Overview`}
           subtitle={
             activeTab === 'Fleet'

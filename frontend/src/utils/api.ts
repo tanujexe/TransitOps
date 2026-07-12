@@ -7,7 +7,28 @@ const API_BASE_URL = 'http://localhost:5000/api'
 // Automatic authentication token helper
 const getToken = () => localStorage.getItem('token')
 const setToken = (token: string) => localStorage.setItem('token', token)
+export const clearToken = () => {
+  localStorage.removeItem('token')
+  localStorage.removeItem('activeRole')
+  localStorage.removeItem('user')
+}
 const getActiveRole = () => localStorage.getItem('activeRole') || 'FLEET_MANAGER'
+
+// Login with real email + password (used by AuthPage)
+export async function loginWithCredentials(email: string, password: string) {
+  const res = await fetch(`${API_BASE_URL}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data?.error?.message || 'Login failed')
+  if (!data?.data?.token) throw new Error('No token returned from server')
+  setToken(data.data.token)
+  localStorage.setItem('activeRole', data.data.user.role)
+  localStorage.setItem('user', JSON.stringify(data.data.user))
+  return { token: data.data.token, user: data.data.user }
+}
 
 // Emails for the auto-login profiles
 const ROLE_EMAILS: Record<string, string> = {

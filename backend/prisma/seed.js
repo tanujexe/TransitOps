@@ -1,4 +1,5 @@
 const prisma = require('../src/config/database');
+const prisma = require('../src/config/database');
 const bcrypt = require('bcrypt');
 
 async function main() {
