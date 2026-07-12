@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Outfit', system-ui, -apple-system, sans-serif;
+  --color-bg-main: var(--bg-main);
+  --color-bg-card: var(--bg-card);
+  --color-bg-sidebar: var(--bg-sidebar);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-brand-orange: var(--accent-orange);
+  --color-brand-orange-hover: var(--accent-orange-hover);
+  --color-border-custom: var(--border-color);
+  --shadow-custom: var(--card-shadow);
+}
+
+@layer base {
+  :root {
+    --bg-main: #f3f0ea; /* Cozy warm off-white background */
+    --bg-card: #ffffff; /* Premium white card */
+    --bg-sidebar: #1f2a38; /* Navy blue sidebar */
+    --text-primary: #1c2434;
+    --text-secondary: #64748b;
+    --accent-orange: #f97316; /* Clean orange primary accent */
+    --accent-orange-hover: #ea580c;
+    --border-color: #e2e8f0;
+    --card-shadow: 0 10px 25px -5px rgba(30, 41, 59, 0.05), 0 8px 10px -6px rgba(30, 41, 59, 0.05);
+    
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .dark {
+    --bg-main: #0f172a; /* Sleek dark slate main background */
+    --bg-card: #1e293b; /* Dark slate card background */
+    --bg-sidebar: #0b0f19; /* Darker navy/black sidebar */
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --accent-orange: #f97316;
+    --accent-orange-hover: #ea580c;
+    --border-color: #334155;
+    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+}
+
+/* Custom Scrollbar for premium feel */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.4);
+}
