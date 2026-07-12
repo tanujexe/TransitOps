@@ -436,9 +436,7 @@ function Drivers({ drivers, setDrivers }: DriversProps) {
 						Suspended
 					</button>
 				</div>
-				<div className="text-[11px] text-text-secondary pl-1 font-medium italic">
-					Rule: Expired license or Suspended status → blocked from trip assignment
-				</div>
+				
 			</div>
 
 			{/* EDIT DRIVER MODAL */}
