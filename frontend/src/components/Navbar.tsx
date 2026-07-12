@@ -5,6 +5,8 @@ type NavbarProps = {
   onSearchChange: (value: string) => void
   onDispatchClick: () => void
   onMenuClick?: () => void
+  activeRole: string
+  onRoleChange: (role: string) => void
   title?: string
   subtitle?: string
 }
@@ -14,6 +16,8 @@ function Navbar({
   onSearchChange,
   onDispatchClick,
   onMenuClick,
+  activeRole,
+  onRoleChange,
   title = 'Dashboard Overview',
   subtitle = 'Real-time transit operations monitoring'
 }: NavbarProps) {
@@ -50,7 +54,7 @@ function Navbar({
         />
       </div>
 
-      {/* Right section: Actions + Profile */}
+      {/* Right section: Actions + Role Switcher + Profile */}
       <div className="flex items-center gap-2 sm:gap-4">
         <button
           onClick={onDispatchClick}
@@ -60,6 +64,20 @@ function Navbar({
           <span className="hidden xs:inline">Dispatch Trip</span>
           <span className="xs:hidden">Dispatch</span>
         </button>
+
+        {/* Role Switcher Selector */}
+        <div className="flex items-center gap-1.5">
+          <select
+            value={activeRole}
+            onChange={(e) => onRoleChange(e.target.value)}
+            className="bg-bg-main text-text-primary text-xs font-bold px-2 py-1.5 rounded-xl border border-border-custom cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-orange/30"
+          >
+            <option value="FLEET_MANAGER">Fleet Manager</option>
+            <option value="DISPATCHER">Dispatcher</option>
+            <option value="SAFETY_OFFICER">Safety Officer</option>
+            <option value="FINANCIAL_ANALYST">Financial Analyst</option>
+          </select>
+        </div>
 
         <button className="relative p-2 text-text-secondary hover:text-text-primary hover:bg-bg-main rounded-xl transition-all duration-200">
           <Bell className="h-5 w-5" />
@@ -71,16 +89,15 @@ function Navbar({
         <div className="flex items-center gap-2 sm:gap-3 pl-1 group cursor-pointer">
           <div className="relative h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-slate-200 dark:bg-slate-800 border-2 border-brand-orange overflow-hidden transition-transform duration-200 group-hover:scale-105">
             <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-slate-700 dark:text-slate-300">
-              RK
+              {activeRole === 'FLEET_MANAGER' ? 'FM' : activeRole === 'DISPATCHER' ? 'DS' : activeRole === 'SAFETY_OFFICER' ? 'SO' : 'FA'}
             </span>
           </div>
           <div className="hidden lg:flex flex-col text-left">
             <span className="text-sm font-semibold text-text-primary group-hover:text-brand-orange transition-colors">
-              Raven K.
+              {activeRole === 'FLEET_MANAGER' ? 'Fleet Manager' : activeRole === 'DISPATCHER' ? 'Dispatcher John' : activeRole === 'SAFETY_OFFICER' ? 'Officer Sarah' : 'Analyst Fiona'}
             </span>
-            <span className="text-[10px] font-medium text-text-secondary">Dispatcher</span>
+            <span className="text-[10px] font-medium text-text-secondary uppercase">{activeRole.replace('_', ' ')}</span>
           </div>
-          <ChevronDown className="h-4 w-4 text-text-secondary group-hover:text-text-primary transition-colors hidden sm:block" />
         </div>
       </div>
     </header>

@@ -1,7 +1,13 @@
 import React, { useState } from 'react'
+<<<<<<< HEAD
 import { Plus, Search, X, Shield, Settings, Activity, ArrowUpDown, Info, Truck, CheckCircle } from 'lucide-react'
+=======
+import { Plus, Search, X, Shield, Settings, Activity, ArrowUpDown, Info, Truck } from 'lucide-react'
+import { api } from '../utils/api'
+>>>>>>> 13ba7ee1eacf8e75ed8ff53ead68e0c636f86590
 
 export interface Vehicle {
+  id?: number
   regNo: string
   nameModel: string
   type: string
@@ -69,18 +75,24 @@ export default function Fleet({ vehicles, setVehicles }: FleetProps) {
       status,
     }
 
-    setVehicles([newVehicle, ...vehicles])
-    setIsModalOpen(false)
-    triggerToast(`Vehicle ${newVehicle.nameModel} registered successfully!`)
-    
-    // Reset fields
-    setRegNo('')
-    setNameModel('')
-    setType('Van')
-    setCapacity('')
-    setOdometer(0)
-    setAcqCost(0)
-    setStatus('Available')
+    api.createVehicle(newVehicle)
+      .then((createdVehicle) => {
+        setVehicles([createdVehicle, ...vehicles])
+        setIsModalOpen(false)
+        triggerToast(`Vehicle ${newVehicle.nameModel} registered successfully!`)
+        
+        // Reset fields
+        setRegNo('')
+        setNameModel('')
+        setType('Van')
+        setCapacity('')
+        setOdometer(0)
+        setAcqCost(0)
+        setStatus('Available')
+      })
+      .catch((err) => {
+        alert(`API Error registering vehicle: ${err.message}`)
+      })
   }
 
   // Handle Sort

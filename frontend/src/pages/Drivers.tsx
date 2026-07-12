@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Search, Plus, X, Edit, User, Phone, Calendar, Shield, CreditCard, Star } from 'lucide-react'
+import { api } from '../utils/api'
 
 export interface Driver {
 	id: string
@@ -139,23 +140,24 @@ function Drivers({ drivers, setDrivers }: DriversProps) {
 		const expired = isLicenseExpired(editExpiryDate)
 		const finalStatus = expired ? 'Suspended' : editStatus
 
-		setDrivers((prev) =>
-			prev.map((d) =>
-				d.id === selectedDriver.id
-					? {
-							...d,
-							contact: editContact.trim(),
-							licenseNo: editLicenseNo.trim(),
-							category: editCategory,
-							expiryDate: editExpiryDate,
-							status: finalStatus
-					  }
-					: d
-			)
-		)
+		const updatedDriver: Driver = {
+			...selectedDriver,
+			contact: editContact.trim(),
+			licenseNo: editLicenseNo.trim(),
+			category: editCategory,
+			expiryDate: editExpiryDate,
+			status: finalStatus
+		}
 
-		setIsEditModalOpen(false)
-		setSelectedDriver(null)
+		api.updateDriver(Number(selectedDriver.id), updatedDriver)
+			.then((savedDriver) => {
+				setDrivers((prev) => prev.map((d) => (d.id === selectedDriver.id ? savedDriver : d)))
+				setIsEditModalOpen(false)
+				setSelectedDriver(null)
+			})
+			.catch((err) => {
+				setValidationError(`API Error: ${err.message}`)
+			})
 	}
 
 	// Submit Add Driver form
@@ -179,9 +181,8 @@ function Drivers({ drivers, setDrivers }: DriversProps) {
 		const expired = isLicenseExpired(newExpiryDate)
 		const finalStatus = expired ? 'Suspended' : newStatus
 
-		const nextId = `DRV${(drivers.length + 1).toString().padStart(3, '0')}`
 		const newDriverItem: Driver = {
-			id: nextId,
+			id: '0',
 			name: newName.trim(),
 			contact: newContact.trim(),
 			licenseNo: newLicenseNo.trim(),
@@ -191,17 +192,23 @@ function Drivers({ drivers, setDrivers }: DriversProps) {
 			status: finalStatus
 		}
 
-		setDrivers([newDriverItem, ...drivers])
-
-		// Reset form
-		setNewName('')
-		setNewContact('')
-		setNewStatus('Available')
-		setNewLicenseNo('')
-		setNewCategory('LMV')
-		setNewExpiryDate('')
-		setNewSafetyScore('90')
-		setIsAddModalOpen(false)
+		api.createDriver(newDriverItem)
+			.then((createdDriver) => {
+				setDrivers([createdDriver, ...drivers])
+				
+				// Reset form
+				setNewName('')
+				setNewContact('')
+				setNewStatus('Available')
+				setNewLicenseNo('')
+				setNewCategory('LMV')
+				setNewExpiryDate('')
+				setNewSafetyScore('90')
+				setIsAddModalOpen(false)
+			})
+			.catch((err) => {
+				setValidationError(`API Error: ${err.message}`)
+			})
 	}
 
 	// Filter and Search logic

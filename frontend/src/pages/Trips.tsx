@@ -3,11 +3,15 @@ import { AlertCircle, Clock, Play, MapPin, Truck, User, Scale, Navigation, Check
 import { type Vehicle } from './fleet'
 import { type Trip } from './Dashboard'
 
+import { type Driver } from './Drivers'
+import { api } from '../utils/api'
+
 interface TripsProps {
   trips: Trip[]
   setTrips: React.Dispatch<React.SetStateAction<Trip[]>>
   vehicles: Vehicle[]
   setVehicles: React.Dispatch<React.SetStateAction<Vehicle[]>>
+  drivers: Driver[]
 }
 
 // Seed mock drivers
@@ -20,7 +24,7 @@ const INITIAL_DRIVERS = [
   { name: 'Sarah', status: 'Available', licenseCategory: 'LMV' }
 ]
 
-export default function Trips({ trips, setTrips, vehicles, setVehicles }: TripsProps) {
+export default function Trips({ trips, setTrips, vehicles, setVehicles, drivers }: TripsProps) {
   // Form fields
   const [source, setSource] = useState('Gandhinagar Depot')
   const [destination, setDestination] = useState('Ahmedabad Hub')
@@ -69,7 +73,7 @@ export default function Trips({ trips, setTrips, vehicles, setVehicles }: TripsP
 
   // Filter available drivers & vehicles
   const availableVehicles = vehicles.filter(v => v.status === 'Available')
-  const availableDrivers = INITIAL_DRIVERS.filter(d => d.status === 'Available')
+  const availableDrivers = drivers.filter(d => d.status === 'Available')
 
   // Handle Dispatch submit
   const handleDispatch = (e: React.FormEvent) => {
@@ -85,44 +89,71 @@ export default function Trips({ trips, setTrips, vehicles, setVehicles }: TripsP
     }
 
     const vehicleObj = vehicles.find(v => v.regNo === selectedVehicleReg)!
-    const nextTripId = `TR${(trips.length + 1).toString().padStart(3, '0')}`
+    const driverObj = drivers.find(d => d.name === selectedDriverName)!
 
-    const newTrip: Trip = {
-      id: nextTripId,
-      vehicle: vehicleObj.nameModel,
-      driver: selectedDriverName,
-      status: 'Dispatched',
-      eta: '45 min',
-      vehicleType: vehicleObj.type as any,
-      region: 'North'
+    if (!vehicleObj || !driverObj) {
+      alert('Selected vehicle or driver not found.')
+      return
     }
 
-    // Update state
-    setTrips([newTrip, ...trips])
-    setVehicles(prev =>
-      prev.map(v => (v.regNo === selectedVehicleReg ? { ...v, status: 'On Trip' } : v))
-    )
+    const tripData = {
+      vehicleId: vehicleObj.id,
+      driverId: Number(driverObj.id),
+      cargoWeightKg: cargoWeight,
+      plannedDistance: plannedDistance,
+      revenue: Math.round(plannedDistance * 45), // Sensible estimate
+      startLocation: source,
+      endLocation: destination
+    }
 
-    triggerToast(`Trip ${newTrip.id} dispatched successfully!`)
-
-    // Reset Form
-    setSelectedVehicleReg('')
-    setSelectedDriverName('')
-    setCargoWeight(100)
-    setPlannedDistance(10)
-    setLifecycleStep('Dispatched')
+    api.createTrip(tripData)
+      .then((createdTrip) => {
+        // Dispatch trip on the backend to change its status from DRAFT to DISPATCHED
+        api.updateTripStatus(createdTrip.dbId!, 'DISPATCHED')
+          .then((dispatchedTrip) => {
+            // Update local state lists
+            setTrips([dispatchedTrip, ...trips])
+            setVehicles(prev =>
+              prev.map(v => (v.regNo === selectedVehicleReg ? { ...v, status: 'On Trip' } : v))
+            )
+            triggerToast(`Trip ${dispatchedTrip.id} dispatched successfully!`)
+            
+            // Reset Form
+            setSelectedVehicleReg('')
+            setSelectedDriverName('')
+            setCargoWeight(700)
+            setPlannedDistance(38)
+            setLifecycleStep('Dispatched')
+          })
+      })
+      .catch(err => {
+        alert(`API Error: ${err.message}`)
+      })
   }
 
   // Cancel/Delete trip action
   const handleCancelTrip = (tripId: string, vehicleModel: string) => {
-    setTrips(prev =>
-      prev.map(t => (t.id === tripId ? { ...t, status: 'Cancelled', eta: '—' } : t))
-    )
-    // Make vehicle available again
-    setVehicles(prev =>
-      prev.map(v => (v.nameModel === vehicleModel && v.status === 'On Trip' ? { ...v, status: 'Available' } : v))
-    )
-    triggerToast(`Trip ${tripId} has been cancelled.`)
+    // Find the trip object in state to get its dbId
+    const targetTrip = trips.find(t => t.id === tripId)
+    if (!targetTrip || !targetTrip.dbId) {
+      alert('Trip database ID not found.')
+      return
+    }
+
+    api.cancelTrip(targetTrip.dbId)
+      .then(() => {
+        setTrips(prev =>
+          prev.map(t => (t.id === tripId ? { ...t, status: 'Cancelled', eta: '—' } : t))
+        )
+        // Make vehicle available again
+        setVehicles(prev =>
+          prev.map(v => (v.nameModel === vehicleModel && v.status === 'On Trip' ? { ...v, status: 'Available' } : v))
+        )
+        triggerToast(`Trip ${tripId} has been cancelled.`)
+      })
+      .catch(err => {
+        alert(`API Error cancelling trip: ${err.message}`)
+      })
   }
 
   const getStatusStyle = (status: Trip['status']) => {
