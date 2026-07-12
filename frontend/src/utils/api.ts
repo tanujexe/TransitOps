@@ -31,11 +31,11 @@ export async function login(role: string): Promise<string> {
   }
 
   const data = await res.json()
-  if (data.token) {
-    setToken(data.token)
+  if (data.data && data.data.token) {
+    setToken(data.data.token)
     localStorage.setItem('activeRole', role)
-    localStorage.setItem('user', JSON.stringify(data.user))
-    return data.token
+    localStorage.setItem('user', JSON.stringify(data.data.user))
+    return data.data.token
   }
   throw new Error('No token returned from server')
 }
@@ -161,41 +161,41 @@ export const mappers = {
 // API Methods
 export const api = {
   // Vehicles
-  getVehicles: () => request('/vehicle').then(res => res.data.map(mappers.vehicleFromBackend)),
-  createVehicle: (v: Vehicle) => request('/vehicle', {
+  getVehicles: () => request('/vehicles').then(res => res.data.map(mappers.vehicleFromBackend)),
+  createVehicle: (v: Vehicle) => request('/vehicles', {
     method: 'POST',
     body: JSON.stringify(mappers.vehicleToBackend(v))
   }).then(res => mappers.vehicleFromBackend(res.data)),
-  updateVehicle: (id: string, v: Partial<Vehicle>) => request(`/vehicle/${id}`, {
+  updateVehicle: (id: string, v: Partial<Vehicle>) => request(`/vehicles/${id}`, {
     method: 'PUT',
     body: JSON.stringify(v)
   }).then(res => mappers.vehicleFromBackend(res.data)),
-  deleteVehicle: (id: string) => request(`/vehicle/${id}`, { method: 'DELETE' }),
+  deleteVehicle: (id: string) => request(`/vehicles/${id}`, { method: 'DELETE' }),
 
   // Drivers
-  getDrivers: () => request('/driver').then(res => res.data.map(mappers.driverFromBackend)),
-  createDriver: (d: Driver) => request('/driver', {
+  getDrivers: () => request('/drivers').then(res => res.data.map(mappers.driverFromBackend)),
+  createDriver: (d: Driver) => request('/drivers', {
     method: 'POST',
     body: JSON.stringify(mappers.driverToBackend(d))
   }).then(res => mappers.driverFromBackend(res.data)),
-  updateDriver: (id: number, d: Partial<Driver>) => request(`/driver/${id}`, {
+  updateDriver: (id: number, d: Partial<Driver>) => request(`/drivers/${id}`, {
     method: 'PUT',
     body: JSON.stringify(d)
   }).then(res => mappers.driverFromBackend(res.data)),
-  deleteDriver: (id: number) => request(`/driver/${id}`, { method: 'DELETE' }),
+  deleteDriver: (id: number) => request(`/drivers/${id}`, { method: 'DELETE' }),
 
   // Trips
-  getTrips: () => request('/trip').then(res => res.data.map(mappers.tripFromBackend)),
-  createTrip: (tripData: any) => request('/trip', {
+  getTrips: () => request('/trips').then(res => res.data.map(mappers.tripFromBackend)),
+  createTrip: (tripData: any) => request('/trips', {
     method: 'POST',
     body: JSON.stringify(tripData)
   }).then(res => mappers.tripFromBackend(res.data)),
-  updateTripStatus: (id: number, status: string, actualDistance?: number) => request(`/trip/${id}/status`, {
+  updateTripStatus: (id: number, status: string, actualDistance?: number) => request(`/trips/${id}/status`, {
     method: 'PUT',
     body: JSON.stringify({ status, actualDistance })
   }).then(res => mappers.tripFromBackend(res.data)),
-  cancelTrip: (id: number) => request(`/trip/${id}/cancel`, { method: 'POST' }),
-  completeTrip: (id: number, data: any) => request(`/trip/${id}/complete`, {
+  cancelTrip: (id: number) => request(`/trips/${id}/cancel`, { method: 'POST' }),
+  completeTrip: (id: number, data: any) => request(`/trips/${id}/complete`, {
     method: 'POST',
     body: JSON.stringify(data)
   }),
@@ -214,13 +214,13 @@ export const api = {
   }),
 
   // Fuel & Expenses
-  getFuelLogs: () => request('/expense/fuel'),
-  getGeneralExpenses: () => request('/expense'),
-  createFuelLog: (vehicleId: number, liters: number, cost: number, odometer: number) => request('/expense/fuel', {
+  getFuelLogs: () => request('/expenses/fuel'),
+  getGeneralExpenses: () => request('/expenses'),
+  createFuelLog: (vehicleId: number, liters: number, cost: number, odometer: number) => request('/expenses/fuel', {
     method: 'POST',
     body: JSON.stringify({ vehicleId, amountLiters: liters, cost, odometer })
   }),
-  createGeneralExpense: (vehicleId: number, category: string, amount: number, description: string) => request('/expense', {
+  createGeneralExpense: (vehicleId: number, category: string, amount: number, description: string) => request('/expenses', {
     method: 'POST',
     body: JSON.stringify({ vehicleId, category, amount, description })
   })
