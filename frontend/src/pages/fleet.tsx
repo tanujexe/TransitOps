@@ -1,10 +1,8 @@
 import React, { useState } from 'react'
-<<<<<<< HEAD
+
 import { Plus, Search, X, Shield, Settings, Activity, ArrowUpDown, Info, Truck, CheckCircle } from 'lucide-react'
-=======
-import { Plus, Search, X, Shield, Settings, Activity, ArrowUpDown, Info, Truck } from 'lucide-react'
 import { api } from '../utils/api'
->>>>>>> 13ba7ee1eacf8e75ed8ff53ead68e0c636f86590
+
 
 export interface Vehicle {
   id?: number
