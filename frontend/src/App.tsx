@@ -93,7 +93,7 @@ function App() {
     setNewVehicle(val)
     const selectedVeh = vehicles.find((v) => v.nameModel === val)
     if (selectedVeh) {
-      setNewVehicleType(selectedVeh.type)
+      setNewVehicleType(selectedVeh.type as 'Van' | 'Truck' | 'Mini' | 'Sedan')
     }
   }
 

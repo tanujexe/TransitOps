@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Plus, Search, X, Shield, Settings, Activity, ArrowUpDown, Info, Truck } from 'lucide-react'
+import { Plus, Search, X, Shield, Settings, Activity, ArrowUpDown, Info, Truck, CheckCircle } from 'lucide-react'
 
 export interface Vehicle {
   regNo: string

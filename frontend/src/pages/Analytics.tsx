@@ -174,13 +174,16 @@ export default function Analytics() {
                 <Tooltip 
                   cursor={{ fill: 'rgba(0, 0, 0, 0.02)' }}
                   content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
+                    const value = payload?.[0]?.value
+
+                    if (active && value != null) {
                       return (
                         <div className="bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-3 py-1.5 rounded-lg shadow text-xs font-bold">
-                          ₹{payload[0].value.toLocaleString()}
+                          ₹{Number(value).toLocaleString()}
                         </div>
                       )
                     }
+
                     return null
                   }}
                 />
