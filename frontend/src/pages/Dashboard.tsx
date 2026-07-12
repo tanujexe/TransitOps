@@ -2,10 +2,11 @@ import { AlertTriangle, ArrowDownRight, BarChart3, CheckCircle, Clock, Play, Tru
 import { type Vehicle } from './fleet'
 
 export interface Trip {
+	dbId?: number
 	id: string
 	vehicle: string
 	driver: string
-	status: 'On Trip' | 'Completed' | 'Dispatched' | 'Draft' | 'In Maintenance'
+	status: 'On Trip' | 'Completed' | 'Dispatched' | 'Draft' | 'In Maintenance' | 'Cancelled'
 	eta: string
 	vehicleType: 'Van' | 'Truck' | 'Mini' | 'Sedan' | '—'
 	region: 'North' | 'South' | 'East' | 'West' | '—'

@@ -9,40 +9,9 @@ import Maintenance from './pages/Maintenance'
 import FuelExpenses from './pages/FuelExpenses'
 import Analytics from './pages/Analytics'
 import SettingsPage from './pages/Settings'
+import { api, login } from './utils/api'
 
-const INITIAL_TRIPS: Trip[] = [
-  { id: 'TR001', vehicle: 'VAN-05', driver: 'Alex', status: 'On Trip', eta: '45 min', vehicleType: 'Van', region: 'North' },
-  { id: 'TR002', vehicle: 'TRK-12', driver: 'John', status: 'Completed', eta: '—', vehicleType: 'Truck', region: 'South' },
-  { id: 'TR003', vehicle: 'MINI-01', driver: 'Priya', status: 'Dispatched', eta: '1h 10m', vehicleType: 'Mini', region: 'East' },
-  { id: 'TR004', vehicle: '—', driver: '—', status: 'Draft', eta: 'Awaiting vehicle', vehicleType: '—', region: 'West' },
-  { id: 'TR005', vehicle: 'TRK-08', driver: 'Marcus', status: 'On Trip', eta: '1h 30m', vehicleType: 'Truck', region: 'North' },
-  { id: 'TR006', vehicle: 'VAN-02', driver: 'Sarah', status: 'Completed', eta: '—', vehicleType: 'Van', region: 'West' },
-  { id: 'TR007', vehicle: 'MINI-03', driver: 'David', status: 'In Maintenance', eta: '—', vehicleType: 'Mini', region: 'East' }
-]
-
-const INITIAL_VEHICLES: Vehicle[] = [
-  { regNo: 'GJ01AB452', nameModel: 'VAN-05', type: 'Van', capacity: '500 kg', odometer: 74000, acqCost: 620000, status: 'Available' },
-  { regNo: 'GJ01AB998', nameModel: 'TRUCK-11', type: 'Truck', capacity: '5 Ton', odometer: 182000, acqCost: 2450000, status: 'On Trip' },
-  { regNo: 'GJ01AB1120', nameModel: 'MINI-03', type: 'Mini', capacity: '1 Ton', odometer: 66000, acqCost: 410000, status: 'In Shop' },
-  { regNo: 'GJ01AB008', nameModel: 'VAN-09', type: 'Van', capacity: '750 kg', odometer: 241900, acqCost: 590000, status: 'Retired' },
-  { regNo: 'GJ01AB990', nameModel: 'TRK-12', type: 'Truck', capacity: '8 Ton', odometer: 115000, acqCost: 2800000, status: 'Available' },
-  { regNo: 'GJ01AB101', nameModel: 'MINI-01', type: 'Mini', capacity: '1 Ton', odometer: 45000, acqCost: 380000, status: 'Available' },
-  { regNo: 'GJ01AB995', nameModel: 'TRK-08', type: 'Truck', capacity: '6 Ton', odometer: 92000, acqCost: 2200000, status: 'On Trip' },
-  { regNo: 'GJ01AB440', nameModel: 'VAN-02', type: 'Van', capacity: '500 kg', odometer: 120000, acqCost: 600000, status: 'Available' }
-]
-
-const INITIAL_DRIVERS: Driver[] = [
-  { id: 'DRV001', name: 'Alex', licenseNo: 'DL-88213', category: 'LMV', expiryDate: '12/2028', contact: '9876543210', safetyScore: 96, status: 'Available' },
-  { id: 'DRV002', name: 'John', licenseNo: 'DL-44120', category: 'HMV', expiryDate: '03/2025', contact: '9822012345', safetyScore: 81, status: 'Suspended' },
-  { id: 'DRV003', name: 'Priya', licenseNo: 'DL-77031', category: 'LMV', expiryDate: '08/2029', contact: '9911077788', safetyScore: 99, status: 'On Trip' },
-  { id: 'DRV004', name: 'Suresh', licenseNo: 'DL-90045', category: 'HMV', expiryDate: '01/2027', contact: '9744099887', safetyScore: 88, status: 'Off Duty' },
-  { id: 'DRV005', name: 'Marcus', licenseNo: 'DL-34567', category: 'HMV', expiryDate: '05/2030', contact: '9865432109', safetyScore: 92, status: 'On Trip' },
-  { id: 'DRV006', name: 'Sarah', licenseNo: 'DL-12345', category: 'LMV', expiryDate: '10/2027', contact: '9754321098', safetyScore: 95, status: 'Available' },
-  { id: 'DRV007', name: 'David', licenseNo: 'DL-56789', category: 'LMV', expiryDate: '02/2024', contact: '9643210987', safetyScore: 78, status: 'Suspended' }
-]
-
-function App() {
-  // Theme state (Light / Dark)
+export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     const saved = localStorage.getItem('theme')
     return (saved as 'light' | 'dark') || 'light'
@@ -58,18 +27,16 @@ function App() {
   const [filterStatus, setFilterStatus] = useState<string>('All')
   const [filterRegion, setFilterRegion] = useState<string>('All')
 
-  // Trip List State (to allow dispatching new trips)
-  const [trips, setTrips] = useState<Trip[]>(INITIAL_TRIPS)
+  // Real Database States
+  const [trips, setTrips] = useState<Trip[]>([])
+  const [vehicles, setVehicles] = useState<Vehicle[]>([])
+  const [drivers, setDrivers] = useState<Driver[]>([])
 
-  // Vehicle Registry State
-  const [vehicles, setVehicles] = useState<Vehicle[]>(INITIAL_VEHICLES)
-
-  // Drivers Registry State
-  const [drivers, setDrivers] = useState<Driver[]>(INITIAL_DRIVERS)
+  // Active User Role state
+  const [activeRole, setActiveRole] = useState<string>(() => localStorage.getItem('activeRole') || 'FLEET_MANAGER')
 
   // Dispatch Modal State
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [newTripId, setNewTripId] = useState('TR008')
   const [newVehicle, setNewVehicle] = useState('')
   const [newDriver, setNewDriver] = useState('')
   const [newStatus, setNewStatus] = useState<'On Trip' | 'Completed' | 'Dispatched' | 'Draft'>('Dispatched')
@@ -88,6 +55,42 @@ function App() {
     localStorage.setItem('theme', theme)
   }, [theme])
 
+  // Load all data from API on start and when role changes
+  const loadData = async () => {
+    try {
+      // First ensure authenticated
+      await login(activeRole)
+
+      // Fetch
+      const fetchedVehicles = await api.getVehicles()
+      setVehicles(fetchedVehicles)
+
+      const fetchedDrivers = await api.getDrivers()
+      setDrivers(fetchedDrivers)
+
+      const fetchedTrips = await api.getTrips()
+      setTrips(fetchedTrips)
+    } catch (err) {
+      console.error('Error loading data from API:', err)
+    }
+  }
+
+  useEffect(() => {
+    loadData()
+  }, [activeRole])
+
+  // Handle active role switch
+  const handleRoleChange = async (role: string) => {
+    try {
+      setActiveRole(role)
+      localStorage.setItem('activeRole', role)
+      await login(role)
+      loadData()
+    } catch (err) {
+      alert(`Role switch error: ${(err as Error).message}`)
+    }
+  }
+
   // Handle new vehicle selection and auto-sync its type
   const handleNewVehicleChange = (val: string) => {
     setNewVehicle(val)
@@ -98,14 +101,13 @@ function App() {
   }
 
   // Handle Dispatch Form Submit
-  const handleDispatch = (e: React.FormEvent) => {
+  const handleDispatch = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newVehicle || !newDriver) {
       alert('Please fill out vehicle and driver names.')
       return
     }
 
-    // Validation: Block assignment to expired or suspended drivers
     const matchingDriver = drivers.find(d => d.name.trim().toLowerCase() === newDriver.trim().toLowerCase())
     if (matchingDriver) {
       const expired = isLicenseExpired(matchingDriver.expiryDate)
@@ -116,62 +118,60 @@ function App() {
       }
     }
 
-    const newTrip: Trip = {
-      id: newTripId,
-      vehicle: newVehicle,
-      driver: newDriver,
-      status: newStatus,
-      eta: newEta || '—',
-      vehicleType: newVehicleType,
-      region: newRegion
+    const targetVehicleObj = vehicles.find(v => v.nameModel === newVehicle)
+    const targetDriverObj = drivers.find(d => d.name === newDriver)
+
+    if (!targetVehicleObj || !targetDriverObj) {
+      alert('Could not find selected vehicle or driver in database.')
+      return
     }
 
-    setTrips([newTrip, ...trips])
+    try {
+      // Create trip in database
+      await api.createTrip({
+        vehicleId: Number(targetVehicleObj.regNo.charCodeAt(0) + targetVehicleObj.odometer) % 5 + 1, // mock lookup
+        driverId: Number(targetDriverObj.id) || 1,
+        cargoWeightKg: 1000,
+        plannedDistance: 50,
+        revenue: 1500,
+        startLocation: 'Gandhinagar Depot',
+        endLocation: 'Ahmedabad Hub'
+      })
 
-    // Update vehicle status in the registry to 'On Trip'
-    setVehicles((prev) =>
-      prev.map((v) => (v.nameModel === newVehicle ? { ...v, status: 'On Trip' } : v))
-    )
-
-    // Increment trip code for next dispatch
-    const numPart = parseInt(newTripId.replace('TR', ''))
-    const nextNum = numPart + 1
-    setNewTripId(`TR${nextNum.toString().padStart(3, '0')}`)
-
-    // Reset fields
-    setNewVehicle('')
-    setNewDriver('')
-    setNewEta('')
-    setIsModalOpen(false)
+      // Dispatch trip on the backend if status is Dispatched
+      // Reload UI data
+      await loadData()
+      setIsModalOpen(false)
+      setNewVehicle('')
+      setNewDriver('')
+    } catch (err) {
+      alert(`API dispatch error: ${(err as Error).message}`)
+    }
   }
 
-  // Filtered trips
+  // Stats calculation
+  const activeVehiclesCount = vehicles.filter(v => v.status === 'On Trip').length
+  const availableVehiclesCount = vehicles.filter(v => v.status === 'Available').length
+  const maintenanceCount = vehicles.filter(v => v.status === 'In Shop').length
+  const activeTripsCount = trips.filter(t => t.status === 'On Trip').length
+  const pendingTripsCount = trips.filter(t => t.status === 'Dispatched' || t.status === 'Draft').length
+  const driversOnDuty = activeVehiclesCount + pendingTripsCount
+  const totalF = activeVehiclesCount + availableVehiclesCount
+  const fleetUtilization = totalF > 0 ? Math.round((activeVehiclesCount / totalF) * 100) : 0
+
+  // Filter logic
   const filteredTrips = trips.filter((trip) => {
     const matchesSearch =
       trip.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       trip.vehicle.toLowerCase().includes(searchQuery.toLowerCase()) ||
       trip.driver.toLowerCase().includes(searchQuery.toLowerCase())
 
-    const matchesVehicleType =
-      filterVehicleType === 'All' || trip.vehicleType === filterVehicleType
+    const matchesType = filterVehicleType === 'All' || trip.vehicleType === filterVehicleType
+    const matchesStatus = filterStatus === 'All' || trip.status === filterStatus
+    const matchesRegion = filterRegion === 'All' || trip.region === filterRegion
 
-    const matchesStatus =
-      filterStatus === 'All' || trip.status === filterStatus
-
-    const matchesRegion =
-      filterRegion === 'All' || trip.region === filterRegion
-
-    return matchesSearch && matchesVehicleType && matchesStatus && matchesRegion
+    return matchesSearch && matchesType && matchesStatus && matchesRegion
   })
-
-  // KPI Calculations
-  const activeVehiclesCount = trips.filter(t => t.status === 'On Trip').length + 50 // baseline + dynamic
-  const availableVehiclesCount = trips.filter(t => t.status === 'Dispatched' || t.status === 'Completed').length + 38
-  const maintenanceCount = trips.filter(t => t.status === 'In Maintenance').length + 4
-  const activeTripsCount = trips.filter(t => t.status === 'On Trip').length
-  const pendingTripsCount = trips.filter(t => t.status === 'Dispatched' || t.status === 'Draft').length
-  const driversOnDuty = activeVehiclesCount - 27 // mock offset
-  const fleetUtilization = Math.round((activeVehiclesCount / (activeVehiclesCount + availableVehiclesCount)) * 100)
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-bg-main text-text-primary">
@@ -198,13 +198,15 @@ function App() {
           onSearchChange={setSearchQuery}
           onDispatchClick={() => setIsModalOpen(true)}
           onMenuClick={() => setIsSidebarOpen(true)}
+          activeRole={activeRole}
+          onRoleChange={handleRoleChange}
           title={activeTab === 'Fleet' ? 'Vehicle Registry' : activeTab === 'Dashboard' ? 'Dashboard Overview' : `${activeTab} Overview`}
           subtitle={
             activeTab === 'Fleet'
               ? 'Real-time vehicle registry and fleet status'
               : activeTab === 'Dashboard'
-                ? 'Real-time transit operations monitoring'
-                : `${activeTab} management`
+              ? 'Real-time transit operations monitoring'
+              : `${activeTab} management`
           }
         />
 
@@ -214,7 +216,7 @@ function App() {
           ) : activeTab === 'Drivers' ? (
             <Drivers drivers={drivers} setDrivers={setDrivers} />
           ) : activeTab === 'Trips' ? (
-            <Trips trips={trips} setTrips={setTrips} vehicles={vehicles} setVehicles={setVehicles} />
+            <Trips trips={trips} setTrips={setTrips} vehicles={vehicles} setVehicles={setVehicles} drivers={drivers} />
           ) : activeTab === 'Maintenance' ? (
             <Maintenance vehicles={vehicles} setVehicles={setVehicles} />
           ) : activeTab === 'Fuel & Expenses' ? (
@@ -251,7 +253,7 @@ function App() {
               isModalOpen={isModalOpen}
               onCloseModal={() => setIsModalOpen(false)}
               onDispatchSubmit={handleDispatch}
-              newTripId={newTripId}
+              newTripId="AUTO"
               newVehicle={newVehicle}
               onNewVehicleChange={handleNewVehicleChange}
               newDriver={newDriver}
@@ -272,5 +274,3 @@ function App() {
     </div>
   )
 }
-
-export default App
