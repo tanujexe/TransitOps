@@ -101,7 +101,11 @@ async function request(endpoint: string, options: RequestInit = {}): Promise<any
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
-    const errMsg = err.error?.message || err.message || 'Request failed'
+    let errMsg = err.error?.message || err.message || 'Request failed'
+    if (err.error?.details && Array.isArray(err.error.details)) {
+      const detailsStr = err.error.details.map((d: any) => `${d.field.replace('body.', '')}: ${d.message}`).join(', ')
+      errMsg = `${errMsg}: ${detailsStr}`
+    }
     throw new Error(errMsg)
   }
 
