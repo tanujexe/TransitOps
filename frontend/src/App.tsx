@@ -4,6 +4,11 @@ import Slidebar from './components/Slidebar'
 import Dashboard, { type Trip } from './pages/Dashboard'
 import Fleet, { type Vehicle } from './pages/fleet'
 import Drivers, { type Driver, isLicenseExpired } from './pages/Drivers'
+import Trips from './pages/Trips'
+import Maintenance from './pages/Maintenance'
+import FuelExpenses from './pages/FuelExpenses'
+import Analytics from './pages/Analytics'
+import SettingsPage from './pages/Settings'
 
 const INITIAL_TRIPS: Trip[] = [
   { id: 'TR001', vehicle: 'VAN-05', driver: 'Alex', status: 'On Trip', eta: '45 min', vehicleType: 'Van', region: 'North' },
@@ -45,6 +50,7 @@ function App() {
 
   // Navigation tab state
   const [activeTab, setActiveTab] = useState<string>('Dashboard')
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   // Search & Filters State
   const [searchQuery, setSearchQuery] = useState<string>('')
@@ -169,13 +175,29 @@ function App() {
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-bg-main text-text-primary">
-      <Slidebar activeTab={activeTab} onTabChange={setActiveTab} theme={theme} onThemeChange={setTheme} />
+      {/* Backdrop for mobile */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/55 backdrop-blur-xs z-40 lg:hidden cursor-pointer"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      <Slidebar 
+        activeTab={activeTab} 
+        onTabChange={setActiveTab} 
+        theme={theme} 
+        onThemeChange={setTheme} 
+        isSidebarOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
 
       <div className="flex-1 flex flex-col overflow-hidden">
         <Navbar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           onDispatchClick={() => setIsModalOpen(true)}
+          onMenuClick={() => setIsSidebarOpen(true)}
           title={activeTab === 'Fleet' ? 'Vehicle Registry' : activeTab === 'Dashboard' ? 'Dashboard Overview' : `${activeTab} Overview`}
           subtitle={
             activeTab === 'Fleet'
@@ -191,6 +213,16 @@ function App() {
             <Fleet vehicles={vehicles} setVehicles={setVehicles} />
           ) : activeTab === 'Drivers' ? (
             <Drivers drivers={drivers} setDrivers={setDrivers} />
+          ) : activeTab === 'Trips' ? (
+            <Trips trips={trips} setTrips={setTrips} vehicles={vehicles} setVehicles={setVehicles} />
+          ) : activeTab === 'Maintenance' ? (
+            <Maintenance vehicles={vehicles} setVehicles={setVehicles} />
+          ) : activeTab === 'Fuel & Expenses' ? (
+            <FuelExpenses vehicles={vehicles} />
+          ) : activeTab === 'Analytics' ? (
+            <Analytics />
+          ) : activeTab === 'Settings' ? (
+            <SettingsPage />
           ) : (
             <Dashboard
               activeTab={activeTab}
