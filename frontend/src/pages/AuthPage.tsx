@@ -271,14 +271,13 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
                   Password
                 </label>
                 <div className="relative">
-                  <Lock size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={e => { setPassword(e.target.value); setError(null) }}
                     placeholder="••••••••"
                     disabled={isLocked}
-                    className={`${inputBase} pl-10 pr-11 py-2.5`}
+                    className={`${inputBase} pl-4 pr-11 py-2.5`}
                   />
                   <button
                     type="button"
@@ -396,31 +395,7 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
               </button>
             </form>
 
-            {/* Divider + access info */}
-            <div className="border-t border-border-custom pt-4 space-y-2">
-              <p className="text-xs font-medium text-text-secondary uppercase tracking-wider">Access scoped by role</p>
-              <div className="grid grid-cols-1 gap-1">
-                {ROLES.map(role => (
-                  <div key={role.key} className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: role.color }} />
-                    <p className="text-xs text-text-secondary">
-                      <span className="text-text-primary font-medium">{role.label}</span>
-                      {' → '}
-                      {role.description}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
-
-          {/* Demo hint */}
-          <p className="text-center text-xs text-text-secondary mt-4">
-            Demo password for all accounts:{' '}
-            <code className="font-mono font-semibold text-text-primary bg-bg-card px-1.5 py-0.5 rounded border border-border-custom">
-              Password123
-            </code>
-          </p>
         </div>
       </div>
     </div>

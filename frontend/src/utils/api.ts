@@ -93,14 +93,16 @@ async function request(endpoint: string, options: RequestInit = {}): Promise<any
     })
     if (!retryRes.ok) {
       const err = await retryRes.json().catch(() => ({}))
-      throw new Error(err.message || 'Request failed')
+      const errMsg = err.error?.message || err.message || 'Request failed'
+      throw new Error(errMsg)
     }
     return retryRes.json()
   }
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
-    throw new Error(err.message || 'Request failed')
+    const errMsg = err.error?.message || err.message || 'Request failed'
+    throw new Error(errMsg)
   }
 
   // Handle 204 No Content
