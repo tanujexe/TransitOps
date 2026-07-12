@@ -3,6 +3,7 @@ import Navbar from './components/Navbar'
 import Slidebar from './components/Slidebar'
 import Dashboard, { type Trip } from './pages/Dashboard'
 import Fleet, { type Vehicle } from './pages/fleet'
+import Drivers, { type Driver, isLicenseExpired } from './pages/Drivers'
 
 const INITIAL_TRIPS: Trip[] = [
   { id: 'TR001', vehicle: 'VAN-05', driver: 'Alex', status: 'On Trip', eta: '45 min', vehicleType: 'Van', region: 'North' },
@@ -23,6 +24,16 @@ const INITIAL_VEHICLES: Vehicle[] = [
   { regNo: 'GJ01AB101', nameModel: 'MINI-01', type: 'Mini', capacity: '1 Ton', odometer: 45000, acqCost: 380000, status: 'Available' },
   { regNo: 'GJ01AB995', nameModel: 'TRK-08', type: 'Truck', capacity: '6 Ton', odometer: 92000, acqCost: 2200000, status: 'On Trip' },
   { regNo: 'GJ01AB440', nameModel: 'VAN-02', type: 'Van', capacity: '500 kg', odometer: 120000, acqCost: 600000, status: 'Available' }
+]
+
+const INITIAL_DRIVERS: Driver[] = [
+  { id: 'DRV001', name: 'Alex', licenseNo: 'DL-88213', category: 'LMV', expiryDate: '12/2028', contact: '9876543210', safetyScore: 96, status: 'Available' },
+  { id: 'DRV002', name: 'John', licenseNo: 'DL-44120', category: 'HMV', expiryDate: '03/2025', contact: '9822012345', safetyScore: 81, status: 'Suspended' },
+  { id: 'DRV003', name: 'Priya', licenseNo: 'DL-77031', category: 'LMV', expiryDate: '08/2029', contact: '9911077788', safetyScore: 99, status: 'On Trip' },
+  { id: 'DRV004', name: 'Suresh', licenseNo: 'DL-90045', category: 'HMV', expiryDate: '01/2027', contact: '9744099887', safetyScore: 88, status: 'Off Duty' },
+  { id: 'DRV005', name: 'Marcus', licenseNo: 'DL-34567', category: 'HMV', expiryDate: '05/2030', contact: '9865432109', safetyScore: 92, status: 'On Trip' },
+  { id: 'DRV006', name: 'Sarah', licenseNo: 'DL-12345', category: 'LMV', expiryDate: '10/2027', contact: '9754321098', safetyScore: 95, status: 'Available' },
+  { id: 'DRV007', name: 'David', licenseNo: 'DL-56789', category: 'LMV', expiryDate: '02/2024', contact: '9643210987', safetyScore: 78, status: 'Suspended' }
 ]
 
 function App() {
@@ -46,6 +57,9 @@ function App() {
 
   // Vehicle Registry State
   const [vehicles, setVehicles] = useState<Vehicle[]>(INITIAL_VEHICLES)
+
+  // Drivers Registry State
+  const [drivers, setDrivers] = useState<Driver[]>(INITIAL_DRIVERS)
 
   // Dispatch Modal State
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -84,6 +98,18 @@ function App() {
       alert('Please fill out vehicle and driver names.')
       return
     }
+
+    // Validation: Block assignment to expired or suspended drivers
+    const matchingDriver = drivers.find(d => d.name.trim().toLowerCase() === newDriver.trim().toLowerCase())
+    if (matchingDriver) {
+      const expired = isLicenseExpired(matchingDriver.expiryDate)
+      const suspended = matchingDriver.status === 'Suspended'
+      if (expired || suspended) {
+        alert(`Cannot assign trip to ${matchingDriver.name}. This driver's license is expired or their status is Suspended.`)
+        return
+      }
+    }
+
     const newTrip: Trip = {
       id: newTripId,
       vehicle: newVehicle,
@@ -155,14 +181,16 @@ function App() {
             activeTab === 'Fleet'
               ? 'Real-time vehicle registry and fleet status'
               : activeTab === 'Dashboard'
-              ? 'Real-time transit operations monitoring'
-              : `${activeTab} management`
+                ? 'Real-time transit operations monitoring'
+                : `${activeTab} management`
           }
         />
 
         <main className="flex-1 overflow-y-auto p-8 space-y-6">
           {activeTab === 'Fleet' ? (
             <Fleet vehicles={vehicles} setVehicles={setVehicles} />
+          ) : activeTab === 'Drivers' ? (
+            <Drivers drivers={drivers} setDrivers={setDrivers} />
           ) : (
             <Dashboard
               activeTab={activeTab}
