@@ -18,9 +18,10 @@ export interface Vehicle {
 interface FleetProps {
   vehicles: Vehicle[]
   setVehicles: React.Dispatch<React.SetStateAction<Vehicle[]>>
+  readOnly?: boolean
 }
 
-export default function Fleet({ vehicles, setVehicles }: FleetProps) {
+export default function Fleet({ vehicles, setVehicles, readOnly = false }: FleetProps) {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
   const [sortBy, setSortBy] = useState<'regNo' | 'nameModel' | 'odometer' | 'acqCost'>('nameModel')
@@ -230,13 +231,20 @@ export default function Fleet({ vehicles, setVehicles }: FleetProps) {
           </div>
         </div>
 
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center justify-center gap-2 bg-brand-orange hover:bg-brand-orange-hover active:scale-95 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-orange-500/10 transition-all duration-200 cursor-pointer"
-        >
-          <Plus size={20} />
-          Add Vehicle
-        </button>
+        {readOnly ? (
+          <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500/10 border border-blue-500/20">
+            <Shield size={15} className="text-blue-500 shrink-0" />
+            <span className="text-xs font-semibold text-blue-500 whitespace-nowrap">View Only — no edits allowed</span>
+          </div>
+        ) : (
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center justify-center gap-2 bg-brand-orange hover:bg-brand-orange-hover active:scale-95 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-orange-500/10 transition-all duration-200 cursor-pointer"
+          >
+            <Plus size={20} />
+            Add Vehicle
+          </button>
+        )}
       </div>
 
       {/* Vehicle List — Cards on mobile, Table on md+ */}
